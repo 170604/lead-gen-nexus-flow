@@ -5,6 +5,7 @@ import { useLead } from "@/context/LeadContext";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Factory, Wrench, Shield } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 const FieldsHome = () => {
   const { leadId } = useParams<{ leadId: string }>();
@@ -32,43 +33,51 @@ const FieldsHome = () => {
 
   return (
     <MainLayout title={`Field Options - ${lead.leadNo}`}>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="flex flex-col items-center">
-          <Button 
-            onClick={() => navigate(`/fields/${leadId}/factory-ux`)}
-            className="field-button aspect-square"
-          >
-            <div className="flex flex-col items-center">
-              <Factory className="h-10 w-10 mb-2" />
-              <span>Factory U/X</span>
-            </div>
-          </Button>
+      <Card className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Factory U/X Button */}
+          <div className="flex flex-col items-center">
+            <Button 
+              onClick={() => navigate(`/fields/${leadId}/factory-ux`)}
+              className="w-48 h-48 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-200"
+              variant="outline"
+            >
+              <div className="flex flex-col items-center gap-4">
+                <Factory className="h-16 w-16" />
+                <span className="text-lg font-semibold">Factory U/X</span>
+              </div>
+            </Button>
+          </div>
+          
+          {/* Factory OS Button */}
+          <div className="flex flex-col items-center">
+            <Button 
+              onClick={() => navigate(`/fields/${leadId}/factory-os`)}
+              className="w-48 h-48 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-200"
+              variant="outline"
+            >
+              <div className="flex flex-col items-center gap-4">
+                <Wrench className="h-16 w-16" />
+                <span className="text-lg font-semibold">Factory OS</span>
+              </div>
+            </Button>
+          </div>
+          
+          {/* Machine Safety Button */}
+          <div className="flex flex-col items-center">
+            <Button 
+              onClick={() => navigate(`/fields/${leadId}/machine-safety`)}
+              className="w-48 h-48 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-200"
+              variant="outline"
+            >
+              <div className="flex flex-col items-center gap-4">
+                <Shield className="h-16 w-16" />
+                <span className="text-lg font-semibold">Machine Safety</span>
+              </div>
+            </Button>
+          </div>
         </div>
-        
-        <div className="flex flex-col items-center">
-          <Button 
-            onClick={() => navigate(`/fields/${leadId}/factory-os`)}
-            className="field-button aspect-square"
-          >
-            <div className="flex flex-col items-center">
-              <Wrench className="h-10 w-10 mb-2" />
-              <span>Factory OS</span>
-            </div>
-          </Button>
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <Button 
-            onClick={() => navigate(`/fields/${leadId}/machine-safety`)}
-            className="field-button aspect-square"
-          >
-            <div className="flex flex-col items-center">
-              <Shield className="h-10 w-10 mb-2" />
-              <span>Machine Safety</span>
-            </div>
-          </Button>
-        </div>
-      </div>
+      </Card>
     </MainLayout>
   );
 };
