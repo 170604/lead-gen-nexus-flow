@@ -26,11 +26,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center">
           <div className="flex items-center flex-grow">
-            {/* Logo placeholder - replace with your actual logo */}
+            {/* Logo */}
             <div className="text-xl font-bold text-primary">
-              <span className="sr-only">Your Logo</span>
-              {/* Replace this with an actual logo image */}
-              LOGO 
+              <img 
+                src="/lovable-uploads/73e83bc2-faa2-485c-8821-610ce90f2d7d.png" 
+                alt="BRIGS Logo" 
+                className="h-10" 
+              />
             </div>
           </div>
           
