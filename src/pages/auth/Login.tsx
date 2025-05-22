@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/components/ui/sonner";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -19,6 +20,7 @@ const Login = () => {
     e.preventDefault();
     
     if (!username || !password) {
+      toast.error("Please enter both username and password");
       return;
     }
 
@@ -26,6 +28,7 @@ const Login = () => {
     try {
       const success = await login(username, password);
       if (success) {
+        toast.success("Login successful! Redirecting...");
         navigate("/lead-form");
       }
     } finally {
@@ -36,7 +39,7 @@ const Login = () => {
   return (
     <MainLayout showBackButton={false}>
       <div className="flex justify-center items-center min-h-[80vh]">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md animate-pop-in">
           <CardHeader>
             <CardTitle className="text-center text-2xl text-primary">Login</CardTitle>
             <CardDescription className="text-center">

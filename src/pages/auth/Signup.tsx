@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/components/ui/sonner";
 
 const Signup = () => {
   const [username, setUsername] = useState("");
@@ -21,6 +22,12 @@ const Signup = () => {
     e.preventDefault();
     
     if (!username || !password || !confirmPassword) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -28,6 +35,7 @@ const Signup = () => {
     try {
       const success = await signup(username, password, confirmPassword);
       if (success) {
+        toast.success("Account created successfully!");
         navigate("/login");
       }
     } finally {
@@ -38,7 +46,7 @@ const Signup = () => {
   return (
     <MainLayout showBackButton={false}>
       <div className="flex justify-center items-center min-h-[80vh]">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md animate-pop-in">
           <CardHeader>
             <CardTitle className="text-center text-2xl text-primary">Sign Up</CardTitle>
             <CardDescription className="text-center">

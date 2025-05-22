@@ -17,7 +17,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
 
@@ -37,12 +37,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </div>
           
           {isAuthenticated && (
-            <div>
+            <div className="flex items-center gap-4">
               <button 
-                onClick={() => navigate('/profile')} 
+                onClick={() => navigate('/leads')}
                 className="text-sm text-gray-600 hover:text-primary"
               >
-                Profile
+                Dashboard
+              </button>
+              <button 
+                onClick={() => {
+                  logout();
+                  navigate('/login');
+                }}
+                className="text-sm text-gray-600 hover:text-primary"
+              >
+                Logout
               </button>
             </div>
           )}
@@ -50,7 +59,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       </header>
       
       <main className="flex-grow">
-        <div className="page-container">
+        <div className="page-container page-transition">
           {showBackButton && !isAuthPage && (
             <button onClick={() => navigate(-1)} className="back-button">
               <ArrowLeft size={20} className="mr-1" /> Back
@@ -65,7 +74,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       
       <footer className="bg-gray-100 py-4">
         <div className="container mx-auto px-4 text-center text-sm text-gray-600">
-          &copy; {new Date().getFullYear()} Lead Generation System
+          &copy; {new Date().getFullYear()} Factory Lead Generation System
         </div>
       </footer>
     </div>
