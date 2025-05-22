@@ -22,16 +22,17 @@ const FactoryUX = () => {
   return (
     <MainLayout title={`Factory U/X - Lead ${leadId}`}>
       <Card className="p-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {uxOptions.map(option => (
-            <Button 
-              key={option.id}
-              onClick={() => navigate(`/fields/${leadId}/factory-ux/${option.id}`)}
-              className="field-button aspect-square"
-              variant="outline"
-            >
-              {option.label}
-            </Button>
+            <div key={option.id} className="flex justify-center">
+              <Button 
+                onClick={() => navigate(`/fields/${leadId}/factory-ux/${option.id}`)}
+                className="w-full h-32 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-200"
+                variant="outline"
+              >
+                <span className="text-lg font-semibold">{option.label}</span>
+              </Button>
+            </div>
           ))}
         </div>
       </Card>
