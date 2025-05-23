@@ -1,8 +1,16 @@
 
 import React from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MoreVertical } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { 
+  DropdownMenu, 
+  DropdownMenuTrigger, 
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -38,21 +46,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           
           {isAuthenticated && (
             <div className="flex items-center gap-4">
-              <button 
-                onClick={() => navigate('/leads')}
-                className="text-sm text-gray-600 hover:text-primary"
-              >
-                Dashboard
-              </button>
-              <button 
-                onClick={() => {
-                  logout();
-                  navigate('/login');
-                }}
-                className="text-sm text-gray-600 hover:text-primary"
-              >
-                Logout
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate('/leads')}>
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => {
+                    logout();
+                    navigate('/login');
+                  }}>
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
         </div>

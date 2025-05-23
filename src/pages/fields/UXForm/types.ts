@@ -11,3 +11,11 @@ export interface FormValues {
   price: string;
   totalAmount: string;
 }
+
+export interface UXFormSubmission extends FormValues {
+  id: string;
+  formType: string;
+  leadId: string;
+  submittedBy: string;
+  submittedAt: Date;
+}

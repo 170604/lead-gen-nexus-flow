@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FileText } from "lucide-react";
 
 const FactoryUX = () => {
   const { leadId } = useParams<{ leadId: string }>();
@@ -21,6 +22,20 @@ const FactoryUX = () => {
 
   return (
     <MainLayout title={`Factory U/X - Lead ${leadId}`}>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <p className="text-gray-600">Select a form type to create a new submission</p>
+        </div>
+        <Button 
+          onClick={() => navigate(`/fields/${leadId}/factory-ux-submissions`)}
+          variant="outline"
+          className="flex items-center"
+        >
+          <FileText className="mr-2 h-4 w-4" /> 
+          View Submissions
+        </Button>
+      </div>
+      
       <Card className="p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {uxOptions.map(option => (

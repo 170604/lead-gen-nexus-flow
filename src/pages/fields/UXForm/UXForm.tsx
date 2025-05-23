@@ -13,11 +13,13 @@ import {
 import FormContent from "./FormContent";
 import InvalidFormType from "./InvalidFormType";
 import { FormValues } from "./types";
+import { useUXForms } from "@/context/UXFormsContext";
 
 const UXForm = () => {
   const { leadId, formType } = useParams<{ leadId: string; formType: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { saveFormSubmission } = useUXForms();
   const [subheadingOptions, setSubheadingOptions] = useState<string[]>([]);
   const [auditCategoryOptions, setAuditCategoryOptions] = useState<string[]>([]);
   const [materialCodeOptions, setMaterialCodeOptions] = useState<string[]>([]);
@@ -109,11 +111,19 @@ const UXForm = () => {
 
   const onSubmit = (data: FormValues) => {
     console.log("Form submitted:", data);
-    toast({
-      title: "Form Submitted",
-      description: `${formTitle} form submitted successfully!`,
-    });
-    navigate(`/fields/${leadId}/factory-ux`);
+    
+    // Save the form submission
+    if (formType && leadId) {
+      saveFormSubmission(formType, leadId, data);
+      
+      toast({
+        title: "Form Submitted",
+        description: `${formTitle} form submitted successfully!`,
+      });
+      
+      // Navigate to the submissions view
+      navigate(`/fields/${leadId}/factory-ux-submissions`);
+    }
   };
 
   if (!formOptions) {
