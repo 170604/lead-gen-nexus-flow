@@ -1,20 +1,22 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, FileText } from "lucide-react";
+import { PlusCircle, FileText, RefreshCw } from "lucide-react";
 import { useUXForms } from "@/context/UXFormsContext";
 import { formatFormType } from "@/lib/factoryUXData";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/components/ui/sonner";
 
 const UXFormViewer = () => {
   const { leadId } = useParams<{ leadId: string }>();
   const navigate = useNavigate();
-  const { getSubmissionsByLeadId } = useUXForms();
+  const { getSubmissionsByLeadId, fetchSubmissions } = useUXForms();
   const [selectedFormType, setSelectedFormType] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Get all submissions for this lead
   const submissions = leadId ? getSubmissionsByLeadId(leadId) : [];
@@ -27,6 +29,18 @@ const UXFormViewer = () => {
     ? submissions.filter(sub => sub.formType === selectedFormType)
     : submissions;
   
+  // Function to refresh submissions
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchSubmissions();
+    
+    // Show a loading state briefly
+    setTimeout(() => {
+      setIsRefreshing(false);
+      toast.success("Submissions refreshed");
+    }, 1000);
+  };
+  
   return (
     <MainLayout title={`Factory U/X Submissions - Lead ${leadId}`}>
       <div className="space-y-6">
@@ -38,10 +52,22 @@ const UXFormViewer = () => {
             </p>
           </div>
           
-          <Button onClick={() => navigate(`/fields/${leadId}/factory-ux`)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            New Form
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center"
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+            
+            <Button onClick={() => navigate(`/fields/${leadId}/factory-ux`)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              New Form
+            </Button>
+          </div>
         </div>
         
         <Card>

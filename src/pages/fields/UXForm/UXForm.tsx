@@ -19,7 +19,7 @@ const UXForm = () => {
   const { leadId, formType } = useParams<{ leadId: string; formType: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { saveFormSubmission } = useUXForms();
+  const { saveFormSubmission, fetchSubmissions } = useUXForms();
   const [subheadingOptions, setSubheadingOptions] = useState<string[]>([]);
   const [auditCategoryOptions, setAuditCategoryOptions] = useState<string[]>([]);
   const [materialCodeOptions, setMaterialCodeOptions] = useState<string[]>([]);
@@ -115,6 +115,9 @@ const UXForm = () => {
     // Save the form submission
     if (formType && leadId) {
       saveFormSubmission(formType, leadId, data);
+      
+      // Make sure to fetch the latest submissions
+      fetchSubmissions();
       
       toast({
         title: "Form Submitted",

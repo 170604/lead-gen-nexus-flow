@@ -1,33 +1,32 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { toast } from "@/components/ui/sonner";
-import { FormValues } from "@/pages/fields/UXForm/types";
-
-interface UXFormSubmission extends FormValues {
-  id: string;
-  formType: string;
-  leadId: string;
-  submittedBy: string;
-  submittedAt: Date;
-}
+import { FormValues, UXFormSubmission } from "@/pages/fields/UXForm/types";
 
 interface UXFormsContextType {
   submissions: UXFormSubmission[];
   saveFormSubmission: (formType: string, leadId: string, formData: FormValues) => void;
   getSubmissionsByLeadId: (leadId: string) => UXFormSubmission[];
   getSubmissionsByFormType: (formType: string) => UXFormSubmission[];
+  fetchSubmissions: () => void;
 }
 
 const UXFormsContext = createContext<UXFormsContextType | undefined>(undefined);
+
+// Simulate a shared storage key for demo purposes
+const SHARED_STORAGE_KEY = "shared_ux_form_submissions";
 
 export function UXFormsProvider({ children }: { children: ReactNode }) {
   const [submissions, setSubmissions] = useState<UXFormSubmission[]>([]);
 
   // Load submissions from localStorage on initial render
-  useEffect(() => {
-    const storedSubmissions = localStorage.getItem("uxFormSubmissions");
-    if (storedSubmissions) {
-      try {
+  const fetchSubmissions = () => {
+    try {
+      // For demonstration purposes, we'll use localStorage
+      // In a real application, this would be an API call to a database
+      const storedSubmissions = localStorage.getItem(SHARED_STORAGE_KEY);
+      
+      if (storedSubmissions) {
         const parsedData = JSON.parse(storedSubmissions);
         // Convert ISO date strings back to Date objects
         const submissionsWithDates = parsedData.map((sub: any) => ({
@@ -35,11 +34,22 @@ export function UXFormsProvider({ children }: { children: ReactNode }) {
           submittedAt: new Date(sub.submittedAt)
         }));
         setSubmissions(submissionsWithDates);
-      } catch (error) {
-        console.error("Error parsing stored UX form submissions:", error);
-        localStorage.removeItem("uxFormSubmissions");
+        console.log("Fetched submissions:", submissionsWithDates);
       }
+    } catch (error) {
+      console.error("Error fetching UX form submissions:", error);
     }
+  };
+
+  // Load submissions on initial render
+  useEffect(() => {
+    fetchSubmissions();
+    
+    // Set up an interval to refresh submissions periodically (every 30 seconds)
+    // This is a workaround for the demo to simulate real-time updates
+    const intervalId = setInterval(fetchSubmissions, 30000);
+    
+    return () => clearInterval(intervalId); // Cleanup on unmount
   }, []);
 
   // Save a new form submission
@@ -57,15 +67,31 @@ export function UXFormsProvider({ children }: { children: ReactNode }) {
         submittedAt: new Date()
       };
       
-      const updatedSubmissions = [...submissions, newSubmission];
+      // First, get the latest submissions from storage
+      const storedSubmissions = localStorage.getItem(SHARED_STORAGE_KEY);
+      let existingSubmissions: UXFormSubmission[] = [];
+      
+      if (storedSubmissions) {
+        const parsedData = JSON.parse(storedSubmissions);
+        existingSubmissions = parsedData.map((sub: any) => ({
+          ...sub,
+          submittedAt: new Date(sub.submittedAt)
+        }));
+      }
+      
+      // Add the new submission
+      const updatedSubmissions = [...existingSubmissions, newSubmission];
+      
+      // Update state
       setSubmissions(updatedSubmissions);
       
-      // Store in localStorage with date converted to ISO string
+      // Store in the shared storage location with date converted to ISO string
       const submissionsForStorage = updatedSubmissions.map(sub => ({
         ...sub,
         submittedAt: sub.submittedAt.toISOString()
       }));
-      localStorage.setItem("uxFormSubmissions", JSON.stringify(submissionsForStorage));
+      
+      localStorage.setItem(SHARED_STORAGE_KEY, JSON.stringify(submissionsForStorage));
       
       toast.success("Form submitted and saved successfully!");
     } catch (error) {
@@ -90,7 +116,8 @@ export function UXFormsProvider({ children }: { children: ReactNode }) {
         submissions,
         saveFormSubmission,
         getSubmissionsByLeadId,
-        getSubmissionsByFormType
+        getSubmissionsByFormType,
+        fetchSubmissions
       }}
     >
       {children}
