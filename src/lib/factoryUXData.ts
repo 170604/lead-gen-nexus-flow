@@ -1,8 +1,19 @@
 
 // Factory UX form data configuration
 
+// Type definitions to ensure consistency
+interface FormOptions {
+  headingOptions: string[];
+  getSubheadingOptions?: (heading: string) => string[];
+  getSubheading?: (heading: string) => string;
+  auditCategory?: string[];
+  auditCategoryOptions?: string[];
+  getAuditCategory?: (heading: string) => string;
+  materialCodeOptions?: string[];
+}
+
 // Inventory Matrix Page options
-export const inventoryMatrixOptions = {
+export const inventoryMatrixOptions: FormOptions = {
   headingOptions: [
     "Rack ID",
     "Warehouse Layout",
@@ -15,7 +26,7 @@ export const inventoryMatrixOptions = {
 };
 
 // Change RX Page options
-export const changeRxOptions = {
+export const changeRxOptions: FormOptions = {
   headingOptions: [
     "LOGO",
     "Milestones",
@@ -48,7 +59,7 @@ export const changeRxOptions = {
 };
 
 // Matrix Display Page options
-export const matrixDisplayOptions = {
+export const matrixDisplayOptions: FormOptions = {
   headingOptions: [
     "GMP Score Board",
     "LTIFER Display",
@@ -74,7 +85,7 @@ export const matrixDisplayOptions = {
 };
 
 // Productive Workplace Page options
-export const productiveWorkplaceOptions = {
+export const productiveWorkplaceOptions: FormOptions = {
   headingOptions: [
     "Pipe Marking",
     "Valve/Pressure Joints",
@@ -110,7 +121,7 @@ export const productiveWorkplaceOptions = {
 };
 
 // Safe Workplace Page options
-export const safeWorkplaceOptions = {
+export const safeWorkplaceOptions: FormOptions = {
   headingOptions: [
     "Pollution Control Display",
     "DO's & Don'ts",
@@ -139,7 +150,7 @@ export const safeWorkplaceOptions = {
 };
 
 // Organized Workplace Page options
-export const organizedWorkplaceOptions = {
+export const organizedWorkplaceOptions: FormOptions = {
   headingOptions: [
     "Pylons",
     "Plant Layouts",
@@ -177,7 +188,7 @@ export const organizedWorkplaceOptions = {
 };
 
 // Helper function to get options based on formType
-export const getFormOptionsByType = (formType: string) => {
+export const getFormOptionsByType = (formType: string): FormOptions | null => {
   switch (formType) {
     case "inventory-matrix":
       return inventoryMatrixOptions;

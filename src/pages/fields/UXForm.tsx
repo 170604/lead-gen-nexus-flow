@@ -76,11 +76,15 @@ const UXForm = () => {
     if (!heading || !formOptions) return;
 
     if (formType === "organized-workplace" && formOptions.getSubheadingOptions) {
-      setSubheadingOptions(formOptions.getSubheadingOptions(heading));
+      // For organized workplace, subheadings depend on the heading
+      const options = formOptions.getSubheadingOptions(heading);
+      setSubheadingOptions(options);
+      setValue("subheading", options[0]);
     } else if (formType === "productive-workplace" && formOptions.getSubheading) {
-      // For productive workplace, we need to map the heading to a specific subheading
-      setSubheadingOptions([formOptions.getSubheading(heading)]);
-      setValue("subheading", formOptions.getSubheading(heading));
+      // For productive workplace, we map the heading to a specific subheading
+      const subheading = formOptions.getSubheading(heading);
+      setSubheadingOptions([subheading]);
+      setValue("subheading", subheading);
     } else {
       // For most forms, subheading is the same as heading
       setSubheadingOptions([heading]);
@@ -98,10 +102,15 @@ const UXForm = () => {
       setAuditCategoryOptions([category]);
       setValue("auditCategory", category);
     } else if (formOptions.auditCategory) {
+      // Use fixed audit category (e.g., for inventory-matrix and productive-workplace)
       setAuditCategoryOptions(formOptions.auditCategory);
       setValue("auditCategory", formOptions.auditCategory[0]);
     } else if (formOptions.auditCategoryOptions) {
+      // Use dropdown options (e.g., for change-rx, safe-workplace, organized-workplace)
       setAuditCategoryOptions(formOptions.auditCategoryOptions);
+    } else {
+      // Fallback to empty array
+      setAuditCategoryOptions([]);
     }
   }, [formType, formOptions, heading, setValue]);
 
