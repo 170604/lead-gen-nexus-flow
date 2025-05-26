@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { toast } from "@/components/ui/sonner";
 import { FormValues, UXFormSubmission } from "@/pages/fields/UXForm/types";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UXFormsContextType {
   submissions: UXFormSubmission[];
@@ -13,85 +14,90 @@ interface UXFormsContextType {
 
 const UXFormsContext = createContext<UXFormsContextType | undefined>(undefined);
 
-// Simulate a shared storage key for demo purposes
-const SHARED_STORAGE_KEY = "shared_ux_form_submissions";
-
 export function UXFormsProvider({ children }: { children: ReactNode }) {
   const [submissions, setSubmissions] = useState<UXFormSubmission[]>([]);
 
-  // Load submissions from localStorage on initial render
-  const fetchSubmissions = () => {
+  // Fetch submissions from Supabase
+  const fetchSubmissions = async () => {
     try {
-      // For demonstration purposes, we'll use localStorage
-      // In a real application, this would be an API call to a database
-      const storedSubmissions = localStorage.getItem(SHARED_STORAGE_KEY);
-      
-      if (storedSubmissions) {
-        const parsedData = JSON.parse(storedSubmissions);
-        // Convert ISO date strings back to Date objects
-        const submissionsWithDates = parsedData.map((sub: any) => ({
-          ...sub,
-          submittedAt: new Date(sub.submittedAt)
-        }));
-        setSubmissions(submissionsWithDates);
-        console.log("Fetched submissions:", submissionsWithDates);
+      const { data, error } = await supabase
+        .from('ux_form_submissions')
+        .select('*')
+        .order('submitted_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching submissions:', error);
+        toast.error('Failed to fetch submissions');
+        return;
       }
+
+      // Convert the database format to our UXFormSubmission format
+      const formattedSubmissions: UXFormSubmission[] = data.map(sub => ({
+        id: sub.id,
+        formType: sub.form_type,
+        leadId: sub.lead_id,
+        heading: sub.heading || '',
+        subheading: sub.subheading || '',
+        auditCategory: sub.audit_category || '',
+        materialCode: sub.material_code || '',
+        hsnCode: sub.hsn_code || '',
+        height: sub.height || '',
+        uom: sub.uom || '',
+        quantity: sub.quantity || '',
+        price: sub.price || '',
+        totalAmount: sub.total_amount || '0',
+        submittedBy: sub.submitted_by || 'Anonymous',
+        submittedAt: new Date(sub.submitted_at || Date.now())
+      }));
+
+      setSubmissions(formattedSubmissions);
+      console.log("Fetched submissions from Supabase:", formattedSubmissions);
     } catch (error) {
       console.error("Error fetching UX form submissions:", error);
+      toast.error("Failed to fetch submissions");
     }
   };
 
   // Load submissions on initial render
   useEffect(() => {
     fetchSubmissions();
-    
-    // Set up an interval to refresh submissions periodically (every 30 seconds)
-    // This is a workaround for the demo to simulate real-time updates
-    const intervalId = setInterval(fetchSubmissions, 30000);
-    
-    return () => clearInterval(intervalId); // Cleanup on unmount
   }, []);
 
-  // Save a new form submission
-  const saveFormSubmission = (formType: string, leadId: string, formData: FormValues) => {
+  // Save a new form submission to Supabase
+  const saveFormSubmission = async (formType: string, leadId: string, formData: FormValues) => {
     try {
       const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
       const username = currentUser?.username || "Anonymous";
       
-      const newSubmission: UXFormSubmission = {
-        ...formData,
-        id: `form-${Date.now()}`,
-        formType,
-        leadId,
-        submittedBy: username,
-        submittedAt: new Date()
-      };
-      
-      // First, get the latest submissions from storage
-      const storedSubmissions = localStorage.getItem(SHARED_STORAGE_KEY);
-      let existingSubmissions: UXFormSubmission[] = [];
-      
-      if (storedSubmissions) {
-        const parsedData = JSON.parse(storedSubmissions);
-        existingSubmissions = parsedData.map((sub: any) => ({
-          ...sub,
-          submittedAt: new Date(sub.submittedAt)
-        }));
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from('ux_form_submissions')
+        .insert([{
+          form_type: formType,
+          lead_id: leadId,
+          heading: formData.heading,
+          subheading: formData.subheading,
+          audit_category: formData.auditCategory,
+          material_code: formData.materialCode,
+          hsn_code: formData.hsnCode,
+          height: formData.height,
+          uom: formData.uom,
+          quantity: formData.quantity,
+          price: formData.price,
+          total_amount: formData.totalAmount,
+          submitted_by: username
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving submission:', error);
+        toast.error('Failed to save form submission. Please try again.');
+        return;
       }
-      
-      // Add the new submission
-      const updatedSubmissions = [...existingSubmissions, newSubmission];
-      
-      // Update state
-      setSubmissions(updatedSubmissions);
-      
-      // Store in the shared storage location with date converted to ISO string
-      const submissionsForStorage = updatedSubmissions.map(sub => ({
-        ...sub,
-        submittedAt: sub.submittedAt.toISOString()
-      }));
-      
-      localStorage.setItem(SHARED_STORAGE_KEY, JSON.stringify(submissionsForStorage));
+
+      // Refresh submissions to get the latest data
+      await fetchSubmissions();
       
       toast.success("Form submitted and saved successfully!");
     } catch (error) {

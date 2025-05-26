@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -23,6 +22,7 @@ const UXForm = () => {
   const [subheadingOptions, setSubheadingOptions] = useState<string[]>([]);
   const [auditCategoryOptions, setAuditCategoryOptions] = useState<string[]>([]);
   const [materialCodeOptions, setMaterialCodeOptions] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formOptions = formType ? getFormOptionsByType(formType) : null;
   const formTitle = formType ? formatFormType(formType) : "Factory UX Form";
@@ -109,23 +109,27 @@ const UXForm = () => {
     setValue("totalAmount", total.toFixed(2));
   }, [quantity, price, setValue]);
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     console.log("Form submitted:", data);
     
-    // Save the form submission
-    if (formType && leadId) {
-      saveFormSubmission(formType, leadId, data);
-      
-      // Make sure to fetch the latest submissions
-      fetchSubmissions();
-      
-      toast({
-        title: "Form Submitted",
-        description: `${formTitle} form submitted successfully!`,
-      });
-      
-      // Navigate to the submissions view
-      navigate(`/fields/${leadId}/factory-ux-submissions`);
+    try {
+      // Save the form submission
+      if (formType && leadId) {
+        await saveFormSubmission(formType, leadId, data);
+        
+        toast({
+          title: "Form Submitted",
+          description: `${formTitle} form submitted successfully!`,
+        });
+        
+        // Navigate to the submissions view
+        navigate(`/fields/${leadId}/factory-ux-submissions`);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -147,6 +151,7 @@ const UXForm = () => {
           subheadingOptions={subheadingOptions}
           auditCategoryOptions={auditCategoryOptions}
           materialCodeOptions={materialCodeOptions}
+          isSubmitting={isSubmitting}
         />
       </Card>
     </MainLayout>

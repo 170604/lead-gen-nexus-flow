@@ -19,6 +19,7 @@ interface FormContentProps {
   subheadingOptions: string[];
   auditCategoryOptions: string[];
   materialCodeOptions: string[];
+  isSubmitting?: boolean;
 }
 
 const FormContent: React.FC<FormContentProps> = ({
@@ -30,6 +31,7 @@ const FormContent: React.FC<FormContentProps> = ({
   subheadingOptions,
   auditCategoryOptions,
   materialCodeOptions,
+  isSubmitting = false,
 }) => {
   const navigate = useNavigate();
 
@@ -50,10 +52,13 @@ const FormContent: React.FC<FormContentProps> = ({
             type="button" 
             variant="outline"
             onClick={() => navigate(`/fields/${leadId}/factory-ux`)}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button type="submit">Submit</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Button>
         </div>
       </form>
     </Form>

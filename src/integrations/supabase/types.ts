@@ -9,7 +9,60 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      ux_form_submissions: {
+        Row: {
+          audit_category: string | null
+          form_type: string
+          heading: string | null
+          height: string | null
+          hsn_code: string | null
+          id: string
+          lead_id: string
+          material_code: string | null
+          price: string | null
+          quantity: string | null
+          subheading: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+          total_amount: string | null
+          uom: string | null
+        }
+        Insert: {
+          audit_category?: string | null
+          form_type: string
+          heading?: string | null
+          height?: string | null
+          hsn_code?: string | null
+          id?: string
+          lead_id: string
+          material_code?: string | null
+          price?: string | null
+          quantity?: string | null
+          subheading?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          total_amount?: string | null
+          uom?: string | null
+        }
+        Update: {
+          audit_category?: string | null
+          form_type?: string
+          heading?: string | null
+          height?: string | null
+          hsn_code?: string | null
+          id?: string
+          lead_id?: string
+          material_code?: string | null
+          price?: string | null
+          quantity?: string | null
+          subheading?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          total_amount?: string | null
+          uom?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
