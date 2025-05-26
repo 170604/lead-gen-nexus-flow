@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { subjectOptions } from "@/lib/data";
+import { supabase } from "@/integrations/supabase/client";
 
 const OSForm = () => {
   const { leadId, formType } = useParams<{ leadId: string; formType: string }>();
@@ -31,19 +32,52 @@ const OSForm = () => {
     mailContent: ""
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Here we would normally save the data
-    // For this demo, we just show a success message and navigate back
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     
-    toast.success(`${formTitle} data saved successfully!`);
-    navigate(`/fields/${leadId}/factory-os`);
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      const username = currentUser?.username || "Anonymous";
+      
+      const { data, error } = await supabase
+        .from('factory_os_forms')
+        .insert([{
+          lead_id: leadId,
+          form_type: formType,
+          company_name: isKnowledgeForm ? formData.companyName : null,
+          contact_person: isKnowledgeForm ? formData.contactPerson : null,
+          subject: isKnowledgeForm ? formData.subject : null,
+          mail_content: isKnowledgeForm ? formData.mailContent : null,
+          notes: !isKnowledgeForm ? formData.mailContent : null,
+          submitted_by: username
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving OS form:', error);
+        toast.error('Failed to save form. Please try again.');
+        return;
+      }
+
+      toast.success(`${formTitle} data saved successfully!`);
+      navigate(`/fields/${leadId}/factory-os`);
+    } catch (error) {
+      console.error("Error saving OS form:", error);
+      toast.error("Failed to save form. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -130,11 +164,12 @@ const OSForm = () => {
               type="button" 
               variant="outline" 
               onClick={() => navigate(`/fields/${leadId}/factory-os`)}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit" className="bg-primary hover:bg-primary/90">
-              Submit
+            <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           </CardFooter>
         </form>

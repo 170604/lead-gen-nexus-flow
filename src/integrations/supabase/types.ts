@@ -9,6 +9,129 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      factory_os_forms: {
+        Row: {
+          company_name: string | null
+          contact_person: string | null
+          form_type: string
+          id: string
+          lead_id: string
+          mail_content: string | null
+          notes: string | null
+          subject: string | null
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          contact_person?: string | null
+          form_type: string
+          id?: string
+          lead_id: string
+          mail_content?: string | null
+          notes?: string | null
+          subject?: string | null
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          contact_person?: string | null
+          form_type?: string
+          id?: string
+          lead_id?: string
+          mail_content?: string | null
+          notes?: string | null
+          subject?: string | null
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: []
+      }
+      lead_forms: {
+        Row: {
+          business_potential: string | null
+          company_name: string | null
+          customer_details: string | null
+          date: string
+          discussion: string | null
+          employee_name: string
+          field_observation: string | null
+          id: string
+          insights: string | null
+          lead_id: string
+          lead_no: string
+          new_company_name: string | null
+          place: string
+          remarks: string | null
+          state: string
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          business_potential?: string | null
+          company_name?: string | null
+          customer_details?: string | null
+          date: string
+          discussion?: string | null
+          employee_name: string
+          field_observation?: string | null
+          id?: string
+          insights?: string | null
+          lead_id: string
+          lead_no: string
+          new_company_name?: string | null
+          place: string
+          remarks?: string | null
+          state: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          business_potential?: string | null
+          company_name?: string | null
+          customer_details?: string | null
+          date?: string
+          discussion?: string | null
+          employee_name?: string
+          field_observation?: string | null
+          id?: string
+          insights?: string | null
+          lead_id?: string
+          lead_no?: string
+          new_company_name?: string | null
+          place?: string
+          remarks?: string | null
+          state?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: []
+      }
+      machine_safety_forms: {
+        Row: {
+          id: string
+          lead_id: string
+          safety_notes: string | null
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          id?: string
+          lead_id: string
+          safety_notes?: string | null
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          id?: string
+          lead_id?: string
+          safety_notes?: string | null
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: []
+      }
       ux_form_submissions: {
         Row: {
           audit_category: string | null

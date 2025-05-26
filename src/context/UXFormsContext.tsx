@@ -10,6 +10,7 @@ interface UXFormsContextType {
   getSubmissionsByLeadId: (leadId: string) => UXFormSubmission[];
   getSubmissionsByFormType: (formType: string) => UXFormSubmission[];
   fetchSubmissions: () => void;
+  deleteSubmission: (submissionId: string) => Promise<void>;
 }
 
 const UXFormsContext = createContext<UXFormsContextType | undefined>(undefined);
@@ -106,6 +107,28 @@ export function UXFormsProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Delete a form submission
+  const deleteSubmission = async (submissionId: string) => {
+    try {
+      const { error } = await supabase
+        .from('ux_form_submissions')
+        .delete()
+        .eq('id', submissionId);
+
+      if (error) {
+        console.error('Error deleting submission:', error);
+        toast.error('Failed to delete submission');
+        return;
+      }
+
+      // Refresh submissions after deletion
+      await fetchSubmissions();
+    } catch (error) {
+      console.error("Error deleting submission:", error);
+      toast.error("Failed to delete submission");
+    }
+  };
+
   // Get submissions by lead ID
   const getSubmissionsByLeadId = (leadId: string): UXFormSubmission[] => {
     return submissions.filter(sub => sub.leadId === leadId);
@@ -123,7 +146,8 @@ export function UXFormsProvider({ children }: { children: ReactNode }) {
         saveFormSubmission,
         getSubmissionsByLeadId,
         getSubmissionsByFormType,
-        fetchSubmissions
+        fetchSubmissions,
+        deleteSubmission
       }}
     >
       {children}

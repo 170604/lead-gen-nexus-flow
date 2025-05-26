@@ -7,20 +7,48 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const MachineSafety = () => {
   const { leadId } = useParams<{ leadId: string }>();
   const navigate = useNavigate();
   const [safetyNotes, setSafetyNotes] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Here we would normally save the data
-    // For this demo, we just show a success message
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     
-    toast.success("Safety notes saved successfully!");
-    navigate(`/fields/${leadId}`);
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      const username = currentUser?.username || "Anonymous";
+      
+      const { data, error } = await supabase
+        .from('machine_safety_forms')
+        .insert([{
+          lead_id: leadId,
+          safety_notes: safetyNotes,
+          submitted_by: username
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving machine safety form:', error);
+        toast.error('Failed to save safety notes. Please try again.');
+        return;
+      }
+
+      toast.success("Safety notes saved successfully!");
+      navigate(`/fields/${leadId}`);
+    } catch (error) {
+      console.error("Error saving machine safety form:", error);
+      toast.error("Failed to save safety notes. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -49,11 +77,12 @@ const MachineSafety = () => {
               type="button" 
               variant="outline" 
               onClick={() => navigate(`/fields/${leadId}`)}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit" className="bg-primary hover:bg-primary/90">
-              Submit
+            <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           </CardFooter>
         </form>

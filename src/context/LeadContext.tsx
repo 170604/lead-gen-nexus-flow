@@ -1,13 +1,27 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 
-export interface CompanyOption {
-  id: string;
-  name: string;
+interface Lead {
+  leadNo: string;
+  date: string;
+  state: string;
+  place: string;
+  employeeName: string;
+  companyName?: string;
+  newCompanyName?: string;
+  businessPotential?: string;
+  customerDetails?: string;
+  fieldObservation?: string;
+  discussion?: string;
+  insights?: string;
+  remarks?: string;
+  submittedBy?: string;
+  submittedAt?: Date;
 }
 
-export interface InitialFormData {
+interface InitialFormData {
   leadNo: string;
   date: string;
   state: string;
@@ -15,73 +29,113 @@ export interface InitialFormData {
   employeeName: string;
 }
 
-export interface DetailedFormData extends InitialFormData {
-  companyName: string;
-  newCompanyName?: string;
-  customerDetails: string;
-  fieldObservation: string;
-  discussion: string;
-  insights: string;
-  remarks: string;
-  businessPotential: string;
-}
-
 interface LeadContextType {
-  getNextLeadNumber: () => string;
+  leads: Lead[];
+  currentForm: InitialFormData | null;
   saveInitialForm: (data: InitialFormData) => void;
-  currentLeadData: InitialFormData | null;
-  saveDetailedForm: (data: DetailedFormData) => void;
-  getAllLeads: () => DetailedFormData[];
-  getLeadById: (leadNo: string) => DetailedFormData | undefined;
-  updateLead: (data: DetailedFormData) => void;
+  saveDetailedForm: (data: Partial<Lead>) => void;
+  getAllLeads: () => Lead[];
   deleteLead: (leadNo: string) => void;
-  getCompanyOptions: () => CompanyOption[];
+  fetchLeads: () => void;
 }
 
 const LeadContext = createContext<LeadContextType | undefined>(undefined);
 
 export function LeadProvider({ children }: { children: ReactNode }) {
-  const [currentLeadData, setCurrentLeadData] = useState<InitialFormData | null>(null);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [currentForm, setCurrentForm] = useState<InitialFormData | null>(null);
 
-  // Return all leads from localStorage
-  const getAllLeads = (): DetailedFormData[] => {
+  // Fetch leads from Supabase
+  const fetchLeads = async () => {
     try {
-      return JSON.parse(localStorage.getItem("leads") || "[]");
+      const { data, error } = await supabase
+        .from('lead_forms')
+        .select('*')
+        .order('submitted_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching leads:', error);
+        return;
+      }
+
+      const formattedLeads: Lead[] = data.map(lead => ({
+        leadNo: lead.lead_no,
+        date: lead.date,
+        state: lead.state,
+        place: lead.place,
+        employeeName: lead.employee_name,
+        companyName: lead.company_name || undefined,
+        newCompanyName: lead.new_company_name || undefined,
+        businessPotential: lead.business_potential || undefined,
+        customerDetails: lead.customer_details || undefined,
+        fieldObservation: lead.field_observation || undefined,
+        discussion: lead.discussion || undefined,
+        insights: lead.insights || undefined,
+        remarks: lead.remarks || undefined,
+        submittedBy: lead.submitted_by || undefined,
+        submittedAt: new Date(lead.submitted_at)
+      }));
+
+      setLeads(formattedLeads);
     } catch (error) {
-      console.error("Error getting leads:", error);
-      return [];
+      console.error("Error fetching leads:", error);
     }
   };
 
-  // Generate next lead number
-  const getNextLeadNumber = (): string => {
-    const leads = getAllLeads();
-    const nextNumber = leads.length + 1;
-    return `LEAD-${String(nextNumber).padStart(3, "0")}`;
-  };
+  useEffect(() => {
+    fetchLeads();
+  }, []);
 
-  // Save initial form data
   const saveInitialForm = (data: InitialFormData) => {
-    setCurrentLeadData(data);
+    setCurrentForm(data);
+    localStorage.setItem("currentForm", JSON.stringify(data));
   };
 
-  // Save detailed form data
-  const saveDetailedForm = (data: DetailedFormData) => {
+  const saveDetailedForm = async (data: Partial<Lead>) => {
     try {
-      const leads = getAllLeads();
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      const username = currentUser?.username || "Anonymous";
       
-      // Check if lead already exists
-      const existingLeadIndex = leads.findIndex(lead => lead.leadNo === data.leadNo);
-      
-      if (existingLeadIndex >= 0) {
-        // Update existing lead
-        leads[existingLeadIndex] = data;
-      } else {
-        // Add new lead
-        leads.push(data);
+      if (!currentForm) {
+        toast.error("No initial form data found");
+        return;
       }
+
+      const completeFormData = {
+        ...currentForm,
+        ...data
+      };
+
+      const { error } = await supabase
+        .from('lead_forms')
+        .insert([{
+          lead_id: completeFormData.leadNo,
+          lead_no: completeFormData.leadNo,
+          date: completeFormData.date,
+          state: completeFormData.state,
+          place: completeFormData.place,
+          employee_name: completeFormData.employeeName,
+          company_name: completeFormData.companyName,
+          new_company_name: completeFormData.newCompanyName,
+          business_potential: completeFormData.businessPotential,
+          customer_details: completeFormData.customerDetails,
+          field_observation: completeFormData.fieldObservation,
+          discussion: completeFormData.discussion,
+          insights: completeFormData.insights,
+          remarks: completeFormData.remarks,
+          submitted_by: username
+        }]);
+
+      if (error) {
+        console.error('Error saving lead:', error);
+        toast.error('Failed to save lead. Please try again.');
+        return;
+      }
+
+      await fetchLeads();
+      setCurrentForm(null);
+      localStorage.removeItem("currentForm");
       
-      localStorage.setItem("leads", JSON.stringify(leads));
       toast.success("Lead saved successfully!");
     } catch (error) {
       console.error("Error saving lead:", error);
@@ -89,70 +143,47 @@ export function LeadProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Get lead by ID
-  const getLeadById = (leadNo: string): DetailedFormData | undefined => {
-    const leads = getAllLeads();
-    return leads.find(lead => lead.leadNo === leadNo);
-  };
-
-  // Update lead
-  const updateLead = (data: DetailedFormData) => {
+  const deleteLead = async (leadNo: string) => {
     try {
-      const leads = getAllLeads();
-      const index = leads.findIndex(lead => lead.leadNo === data.leadNo);
-      
-      if (index !== -1) {
-        leads[index] = data;
-        localStorage.setItem("leads", JSON.stringify(leads));
-        toast.success("Lead updated successfully!");
-      } else {
-        toast.error("Lead not found!");
+      const { error } = await supabase
+        .from('lead_forms')
+        .delete()
+        .eq('lead_no', leadNo);
+
+      if (error) {
+        console.error('Error deleting lead:', error);
+        toast.error('Failed to delete lead');
+        return;
       }
-    } catch (error) {
-      console.error("Error updating lead:", error);
-      toast.error("Failed to update lead. Please try again.");
-    }
-  };
 
-  // Delete lead
-  const deleteLead = (leadNo: string) => {
-    try {
-      const leads = getAllLeads().filter(lead => lead.leadNo !== leadNo);
-      localStorage.setItem("leads", JSON.stringify(leads));
-      toast.success("Lead deleted successfully!");
+      await fetchLeads();
+      toast.success("Lead deleted successfully");
     } catch (error) {
       console.error("Error deleting lead:", error);
-      toast.error("Failed to delete lead. Please try again.");
+      toast.error("Failed to delete lead");
     }
   };
 
-  // Get unique company options from leads
-  const getCompanyOptions = (): CompanyOption[] => {
-    const leads = getAllLeads();
-    const companies = new Map<string, CompanyOption>();
-    
-    leads.forEach(lead => {
-      const companyName = lead.newCompanyName || lead.companyName;
-      if (companyName && !companies.has(companyName)) {
-        companies.set(companyName, { id: companyName, name: companyName });
-      }
-    });
-    
-    return Array.from(companies.values());
-  };
+  const getAllLeads = () => leads;
+
+  // Load current form from localStorage on init
+  useEffect(() => {
+    const savedForm = localStorage.getItem("currentForm");
+    if (savedForm) {
+      setCurrentForm(JSON.parse(savedForm));
+    }
+  }, []);
 
   return (
     <LeadContext.Provider 
       value={{ 
-        getNextLeadNumber,
-        saveInitialForm,
-        currentLeadData,
-        saveDetailedForm,
-        getAllLeads,
-        getLeadById,
-        updateLead,
+        leads, 
+        currentForm, 
+        saveInitialForm, 
+        saveDetailedForm, 
+        getAllLeads, 
         deleteLead,
-        getCompanyOptions
+        fetchLeads
       }}
     >
       {children}
