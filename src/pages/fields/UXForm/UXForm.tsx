@@ -47,48 +47,39 @@ const UXForm = () => {
   const quantity = watch("quantity");
   const price = watch("price");
 
-  // Update subheading options when heading changes
+  // Update subheading when heading changes
   useEffect(() => {
     if (!heading || !formOptions) return;
 
     if (formType === "organized-workplace" && formOptions.getSubheadingOptions) {
-      // For organized workplace, subheadings depend on the heading
       const options = formOptions.getSubheadingOptions(heading);
       setSubheadingOptions(options);
       setValue("subheading", options[0]);
-    } else if (formType === "productive-workplace" && formOptions.getSubheading) {
-      // For productive workplace, we map the heading to a specific subheading
+    } else if (formOptions.getSubheading) {
       const subheading = formOptions.getSubheading(heading);
       setSubheadingOptions([subheading]);
       setValue("subheading", subheading);
     } else {
-      // For most forms, subheading is the same as heading
       setSubheadingOptions([heading]);
       setValue("subheading", heading);
     }
   }, [heading, formType, formOptions, setValue]);
 
-  // Set audit category options
+  // Set audit category when heading changes
   useEffect(() => {
-    if (!formOptions) return;
+    if (!heading || !formOptions) return;
 
-    if (formType === "matrix-display" && formOptions.getAuditCategory) {
-      // For matrix-display, audit category depends on heading
+    if (formOptions.getAuditCategory) {
       const category = formOptions.getAuditCategory(heading);
       setAuditCategoryOptions([category]);
       setValue("auditCategory", category);
     } else if (formOptions.auditCategory) {
-      // Use fixed audit category (e.g., for inventory-matrix and productive-workplace)
       setAuditCategoryOptions(formOptions.auditCategory);
       setValue("auditCategory", formOptions.auditCategory[0]);
-    } else if (formOptions.auditCategoryOptions) {
-      // Use dropdown options (e.g., for change-rx, safe-workplace, organized-workplace)
-      setAuditCategoryOptions(formOptions.auditCategoryOptions);
     } else {
-      // Fallback to empty array
       setAuditCategoryOptions([]);
     }
-  }, [formType, formOptions, heading, setValue]);
+  }, [heading, formType, formOptions, setValue]);
 
   // Set material code options
   useEffect(() => {
@@ -116,7 +107,6 @@ const UXForm = () => {
     console.log("Form submitted:", data);
     
     try {
-      // Save the form submission
       if (formType && leadId) {
         await saveFormSubmission(formType, leadId, data);
         
@@ -125,7 +115,6 @@ const UXForm = () => {
           description: `${formTitle} form submitted successfully!`,
         });
         
-        // Navigate to the submissions view
         navigate(`/fields/${leadId}/factory-ux-submissions`);
       }
     } finally {

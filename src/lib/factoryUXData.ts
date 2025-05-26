@@ -21,7 +21,8 @@ export const inventoryMatrixOptions: FormOptions = {
     "Experience Center",
     "QR Load of Material Tracking"
   ],
-  auditCategory: ["Process Audit"],
+  getSubheading: (heading: string) => heading,
+  getAuditCategory: () => "Process Audit",
   materialCodeOptions: ["E-327", "E-627", "E-425-P"]
 };
 
@@ -45,7 +46,11 @@ export const changeRxOptions: FormOptions = {
     "Motivational Signs",
     "Employee Engagement"
   ],
-  auditCategoryOptions: ["Aesthetic Audit", "Periphery"],
+  getSubheading: (heading: string) => heading,
+  getAuditCategory: (heading: string) => {
+    const aestheticHeadings = ["LOGO", "Wall Graphics", "Glass Graphics", "Decorative Sign", "Employee Engagement Signs", "Employee of the Month", "Motivational Signs"];
+    return aestheticHeadings.includes(heading) ? "Aesthetic Audit" : "Periphery";
+  },
   materialCodeOptions: [
     "E-318",
     "E-323",
@@ -70,6 +75,7 @@ export const matrixDisplayOptions: FormOptions = {
     "HR Corner",
     "R&R"
   ],
+  getSubheading: (heading: string) => heading,
   getAuditCategory: (heading: string) => {
     return heading === "LTIFER Display" ? "Safety Audit" : "Process Audit";
   },
@@ -116,7 +122,7 @@ export const productiveWorkplaceOptions: FormOptions = {
     };
     return mapping[heading] || heading;
   },
-  auditCategory: ["Process Audit"],
+  getAuditCategory: () => "Process Audit",
   materialCodeOptions: ["E-314", "E-622-P", "E-421-P", "E-421"]
 };
 
@@ -141,12 +147,17 @@ export const safeWorkplaceOptions: FormOptions = {
     "IRC",
     "PPE Matrix"
   ],
-  auditCategoryOptions: [
-    "Periphery",
-    "Process Audit",
-    "Safety Audit",
-    "Emergency Evacuation Audit"
-  ]
+  getSubheading: (heading: string) => heading,
+  getAuditCategory: (heading: string) => {
+    const safetyHeadings = ["Large Customized Safety Signage", "Points of Hazards", "SIS", "GHS", "GHS Label", "NFPA", "Visual SDS", "Safety Static Display", "Life Saving Rule", "IRC", "PPE Matrix"];
+    const evacuationHeadings = ["Emergency Evacuation Plans", "Emergency Response Team"];
+    const processHeadings = ["Pollution Control Display", "Single Line Diagram", "Q Sign"];
+    
+    if (safetyHeadings.includes(heading)) return "Safety Audit";
+    if (evacuationHeadings.includes(heading)) return "Emergency Evacuation Audit";
+    if (processHeadings.includes(heading)) return "Process Audit";
+    return "Periphery";
+  }
 };
 
 // Organized Workplace Page options
@@ -184,7 +195,11 @@ export const organizedWorkplaceOptions: FormOptions = {
         return [heading];
     }
   },
-  auditCategoryOptions: ["Periphery", "Process Audit"]
+  getSubheading: (heading: string) => heading,
+  getAuditCategory: (heading: string) => {
+    const peripheryHeadings = ["Pylons", "Large Navigation Signs", "Indoor Navigation"];
+    return peripheryHeadings.includes(heading) ? "Periphery" : "Process Audit";
+  }
 };
 
 // Helper function to get options based on formType

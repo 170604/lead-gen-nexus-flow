@@ -34,7 +34,8 @@ const FormFieldsGrid: React.FC<FormFieldsGridProps> = ({
 
       <SubheadingField 
         form={form} 
-        subheadingOptions={subheadingOptions} 
+        subheadingOptions={subheadingOptions}
+        formType={formType}
       />
 
       <AuditCategoryField 

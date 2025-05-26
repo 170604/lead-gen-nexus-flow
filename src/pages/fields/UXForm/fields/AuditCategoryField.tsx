@@ -8,13 +8,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { FormValues } from "../types";
 
 interface AuditCategoryFieldProps {
@@ -33,20 +27,14 @@ const AuditCategoryField: React.FC<AuditCategoryFieldProps> = ({
       render={({ field }) => (
         <FormItem>
           <FormLabel>Audit Category</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select an audit category" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {auditCategoryOptions.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FormControl>
+            <Input 
+              {...field} 
+              readOnly 
+              className="bg-gray-50"
+              placeholder="Auto-filled based on heading"
+            />
+          </FormControl>
           <FormMessage />
         </FormItem>
       )}

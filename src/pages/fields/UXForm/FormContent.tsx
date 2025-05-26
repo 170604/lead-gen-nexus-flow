@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
 import { FormValues } from "./types";
 import FormFieldsGrid from "./FormFieldsGrid";
+import { exportFormToExcel } from "@/lib/uxFormExcelExport";
+import { Download } from "lucide-react";
 
 interface FormContentProps {
   form: UseFormReturn<FormValues>;
@@ -35,6 +37,11 @@ const FormContent: React.FC<FormContentProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  const handleDownloadExcel = () => {
+    const formData = form.getValues();
+    exportFormToExcel(formData, formType, leadId);
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -47,18 +54,30 @@ const FormContent: React.FC<FormContentProps> = ({
           materialCodeOptions={materialCodeOptions}
         />
 
-        <div className="flex justify-end space-x-4">
+        <div className="flex justify-between">
           <Button 
             type="button" 
             variant="outline"
-            onClick={() => navigate(`/fields/${leadId}/factory-ux`)}
-            disabled={isSubmitting}
+            onClick={handleDownloadExcel}
+            className="flex items-center"
           >
-            Cancel
+            <Download className="mr-2 h-4 w-4" />
+            Download Excel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Submit"}
-          </Button>
+          
+          <div className="flex space-x-4">
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={() => navigate(`/fields/${leadId}/factory-ux`)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit"}
+            </Button>
+          </div>
         </div>
       </form>
     </Form>
