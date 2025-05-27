@@ -21,6 +21,25 @@ interface Lead {
   submittedAt?: Date;
 }
 
+// Export the type for external use
+export interface DetailedFormData {
+  leadNo: string;
+  date: string;
+  state: string;
+  place: string;
+  employeeName: string;
+  companyName?: string;
+  newCompanyName?: string;
+  businessPotential?: string;
+  customerDetails?: string;
+  fieldObservation?: string;
+  discussion?: string;
+  insights?: string;
+  remarks?: string;
+  submittedBy?: string;
+  submittedAt?: Date;
+}
+
 interface InitialFormData {
   leadNo: string;
   date: string;
@@ -29,14 +48,23 @@ interface InitialFormData {
   employeeName: string;
 }
 
+interface CompanyOption {
+  id: string;
+  name: string;
+}
+
 interface LeadContextType {
   leads: Lead[];
   currentForm: InitialFormData | null;
+  currentLeadData: InitialFormData | null;
   saveInitialForm: (data: InitialFormData) => void;
   saveDetailedForm: (data: Partial<Lead>) => void;
   getAllLeads: () => Lead[];
   deleteLead: (leadNo: string) => void;
   fetchLeads: () => void;
+  getNextLeadNumber: () => string;
+  getCompanyOptions: () => CompanyOption[];
+  getLeadById: (leadId: string) => Lead | undefined;
 }
 
 const LeadContext = createContext<LeadContextType | undefined>(undefined);
@@ -85,6 +113,35 @@ export function LeadProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchLeads();
   }, []);
+
+  // Generate next lead number
+  const getNextLeadNumber = (): string => {
+    const leadCount = leads.length;
+    return `LEAD-${String(leadCount + 1).padStart(3, '0')}`;
+  };
+
+  // Get company options from existing leads
+  const getCompanyOptions = (): CompanyOption[] => {
+    const companies = new Set<string>();
+    leads.forEach(lead => {
+      if (lead.companyName && lead.companyName !== "New") {
+        companies.add(lead.companyName);
+      }
+      if (lead.newCompanyName) {
+        companies.add(lead.newCompanyName);
+      }
+    });
+    
+    return Array.from(companies).map((name, index) => ({
+      id: `company-${index}`,
+      name
+    }));
+  };
+
+  // Get lead by ID
+  const getLeadById = (leadId: string): Lead | undefined => {
+    return leads.find(lead => lead.leadNo === leadId);
+  };
 
   const saveInitialForm = (data: InitialFormData) => {
     setCurrentForm(data);
@@ -178,12 +235,16 @@ export function LeadProvider({ children }: { children: ReactNode }) {
     <LeadContext.Provider 
       value={{ 
         leads, 
-        currentForm, 
+        currentForm,
+        currentLeadData: currentForm,
         saveInitialForm, 
         saveDetailedForm, 
         getAllLeads, 
         deleteLead,
-        fetchLeads
+        fetchLeads,
+        getNextLeadNumber,
+        getCompanyOptions,
+        getLeadById
       }}
     >
       {children}
