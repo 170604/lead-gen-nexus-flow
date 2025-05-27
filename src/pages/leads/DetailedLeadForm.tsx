@@ -43,10 +43,21 @@ const DetailedLeadForm = () => {
       const existingLead = getLeadById(currentLeadData.leadNo);
       
       if (existingLead) {
-        // If editing existing lead
+        // If editing existing lead, provide default values for optional properties
         setFormData({
-          ...existingLead,
-          newCompanyName: existingLead.newCompanyName || ""
+          leadNo: existingLead.leadNo,
+          date: existingLead.date,
+          state: existingLead.state,
+          place: existingLead.place,
+          employeeName: existingLead.employeeName,
+          companyName: existingLead.companyName || "",
+          newCompanyName: existingLead.newCompanyName || "",
+          customerDetails: existingLead.customerDetails || "",
+          fieldObservation: existingLead.fieldObservation || "",
+          discussion: existingLead.discussion || "",
+          insights: existingLead.insights || "",
+          remarks: existingLead.remarks || "",
+          businessPotential: existingLead.businessPotential || ""
         });
         setCompanyType(existingLead.companyName === "New" ? "new" : "existing");
       } else {
