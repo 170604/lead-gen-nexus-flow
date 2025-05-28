@@ -30,7 +30,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 relative">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center">
           <div className="flex items-center flex-grow">
@@ -83,18 +83,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           {children}
         </div>
       </main>
-      
-      {/* Factory icon watermark in bottom left corner */}
-      <div className="fixed bottom-4 left-4 z-10 pointer-events-none">
-        <img 
-          src="/lovable-uploads/9c14d1d9-115e-4078-89b9-405ecf3c3dbc.png" 
-          alt="Factory Icon" 
-          className="w-20 h-20 opacity-30"
-          style={{
-            filter: 'sepia(100%) saturate(1000%) hue-rotate(-10deg) brightness(1.2)',
-          }}
-        />
-      </div>
       
       <footer className="bg-gray-100 py-4">
         <div className="container mx-auto px-4 text-center text-sm text-gray-600">
